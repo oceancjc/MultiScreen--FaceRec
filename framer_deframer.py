@@ -9,7 +9,8 @@ from optparse import OptionParser
 
 port = 12345
 loglevel = 1
-logfile = 0
+logfile = 'log@{}.txt'.format( datetime.datetime.now().strftime('%Y_%m_%d') )
+
 def printlog(content):
     global loglevel
     timestick ='[{}]'.format( datetime.datetime.now().strftime('%Y-%m-%d %H:%M%S') )
