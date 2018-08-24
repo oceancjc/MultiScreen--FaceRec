@@ -100,6 +100,7 @@ portg,loglevelg = optiondeal()
 logfileg = 'log@{}@{}.txt'.format(int(portg), datetime.datetime.now().strftime('%Y_%m_%d') )
 #TODO: Loading the face lib dict
 server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+server.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
 try:
     server.bind( ('127.0.0.1',int(portg)) )
 except:
