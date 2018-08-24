@@ -5,7 +5,7 @@ Spyder Editor
 This is a temporary script file.
 """
 import socket,datetime,time,logging
-import sys
+import sys,traceback
 from optparse import OptionParser
 
 portg = 12345
@@ -106,9 +106,13 @@ try:
 except:
     printlog('Can not create UDP socket ... Program Ends', 'ERROR')
     sys.exit()
-printlog('Face Recog Start...')
+printlog('===================== Face Recog Start =============================')
 while True:
-    data,addr_from = server.recvfrom(32768)
+    try:
+        data,addr_from = server.recvfrom(32768)
+    except:
+        printlog(traceback.format_exc(),'ERROR')
+        continue
     printlog('+++++ CMD receive: '+str(data))
     r_dict = deframer( str(data) )
     if len(r_dict) is 1: 
