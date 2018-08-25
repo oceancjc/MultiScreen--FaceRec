@@ -4,43 +4,15 @@ Spyder Editor
 
 This is a temporary script file.
 """
-import socket,datetime,time,logging
-import sys,traceback
+import socket,datetime,time,pickle
+import sys,traceback,os
 from optparse import OptionParser
+from loggingcjc import printlog
+from record2facelib import faceRecog
 
 portg = 12345
 loglevelg = 2
 logfileg = ''
-
-def printlog(content, title = 'INFO' ):
-    global loglevelg
-    timestick ='[{} {}]'.format( datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), title )
-    if loglevelg == 1:
-        print(timestick + content)
-    elif loglevelg == 2:
-        global logfileg
-        f = open(logfileg,'a+')
-        print( timestick + content, file = f) #print into file
-        f.close()
-        print(timestick + content)
-
-
-
-def setupLog(loglevel):
-   logger = logging.getLogger() 
-   logger.setLevel(logging.INFO)
-   formatter = logging.Formatter('%(asctime)s [%(levelname)s]: %(message)s')
-   if loglevel == 2:
-       global logfileg
-       handler = logging.FileHandler(logfileg)
-       handler.setLevel(logging.INFO)
-       handler.setFormatter(formatter)
-       logger.addHandler(handler)
-   console = logging.StreamHandler()
-   console.setLevel(logging.INFO)
-   console.setFormatter(formatter)
-   logger.addHandler(console)
-   
 
 
 def deframer(cmd):
@@ -62,19 +34,31 @@ def deframer(cmd):
             res = {-2:'ID instance not equal n'}
             return res
         for i in range(res['n']):
-            tmp = cmd_s[7+i]
-            res[i] = tmp
+            tmp = cmd_s[7+i].split(',')[0]
+            res[i] = [tmp,0]
         return res
 
 
 
-def framer(eledict):
+def framer(eledict,facesDetected_dict):
     eles = ['Facerecognition', eledict['subid'], eledict['chnid'], eledict['label'], eledict['file'],\
             str(eledict['port']), str(eledict['n'])]
     for i in range(eledict['n']):
-        eles.append(eledict[i])
+        if eledict[i][0] in facesDetecteds.keys():
+            eles.append( '{},{}'.format(eledict[i][0],1) )
+        else:    eles.append( '{},{}'.format(eledict[i][0],0) )
     return '#$'.join(eles)
 
+
+
+def pickInterestLib(frameDict,faceLibDict):
+    res = {}
+    for i in range(frameDict['n']):
+        if frameDict[i][0] in faceLibDict.keys():
+            res[frameDict[i][0]] = faceLibDict[frameDict[i][0]]
+        else:
+            printlog("Target Person not in Lib","WARNING")
+    return res
 
 
 def optiondeal():
@@ -99,6 +83,14 @@ portg,loglevelg = optiondeal()
 #cmd = r'Facerecognition#$111#$222#$hello#$C:\123.png#$5556#$3#$xidada,0#$huge,0#$cjc,0'
 logfileg = 'log@{}@{}.txt'.format(int(portg), datetime.datetime.now().strftime('%Y_%m_%d') )
 #TODO: Loading the face lib dict
+try:
+    with open(r'./face lib/face.lib','rb') as f:
+        facelib = pickle.load(f)
+except:
+    printlog(traceback.format_exc(),'ERROR')
+    sys.exit()
+            
+#r = faceRecog(facelib,'test0.png')
 server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 server.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
 try:
@@ -107,6 +99,9 @@ except:
     printlog('Can not create UDP socket ... Program Ends', 'ERROR')
     sys.exit()
 printlog('===================== Face Recog Start =============================')
+
+interestfacelib={}
+faces_dict={}
 while True:
     try:
         data,addr_from = server.recvfrom(32768)
@@ -114,13 +109,25 @@ while True:
         printlog(traceback.format_exc(),'ERROR')
         continue
     printlog('+++++ CMD receive: '+str(data))
+    if 'close' in str(data):    sys.exit()
     r_dict = deframer( str(data) )
+    addr2reply = (addr_from[0],r_dict['port'])
     if len(r_dict) is 1: 
-        pass
         server.sendto("Not valid, check your command\n".encode('utf-8'),addr_from)
+    elif not facelib:
+        server.sendto("Empyt Face Lib, Please check".encode('utf-8'), addr2reply )
+        printlog("Send Message to {}:Empyt Face Lib, Please check".format(addr2reply),"WARNING")
     else:
-        s = framer(r_dict)
-        #Send the frame s to the correspoing address in deframer's result
+        if not os.path.exists(r_dict['file']):
+            server.sendto("Image to Recog Face Not Exist ...".encode('utf-8'),addr2reply )
+            printlog("Send Message to {}:Image to Recog Face Not Exist ...".format(addr2reply), "ERROR")
+            continue
+        interestfacelib = pickInterestLib(r_dict,facelib)
+        facesDetecteds = faceRecog(interestfacelib,r_dict['file'])
+        #for i in faces_dict.keys():
+            
+        
+        s = framer(r_dict,faces_dict)
         try:
             server.sendto(s.encode('utf-8'), (addr_from[0],r_dict['port']) )
             printlog( 'Message sent to {}:{}'.format(addr_from[0],r_dict['port']) )
