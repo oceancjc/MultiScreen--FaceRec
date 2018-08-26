@@ -1,15 +1,40 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 Created on Fri Aug 24 23:06:33 2018
 
 @author: oceancjc
 """
+from __future__ import print_function
 import datetime,logging
 
 
-portg = 12345
 loglevelg = 1
 logfileg = ''
+
+
+def setloglevel(level):
+    global loglevelg
+    loglevelg = level
+    
+    
+    
+def getloglevel():
+    global loglevelg
+    return loglevelg
+
+
+
+def setlogfilePath(path):
+    global logfileg
+    logfileg = path
+    
+    
+    
+def getlogfilePath():
+    global logfileg
+    return logfileg    
+
+
 
 def printlog(content, title = 'INFO' ):
     global loglevelg
@@ -39,3 +64,7 @@ def setupLog(loglevel):
    console.setLevel(logging.INFO)
    console.setFormatter(formatter)
    logger.addHandler(console)
+   
+   
+   
+   

@@ -1,22 +1,18 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 Created on Sun Aug 19 14:31:32 2018
 
 """
-
-import traceback
-import sys
-import os
-import dlib
-import glob
+from __future__ import print_function
+import traceback,sys,os
+import dlib,glob
 from skimage import io
 import numpy as np
 import pickle,time
-
 from loggingcjc import printlog
         
 
-loglevelg = 1
+
     
     
 def faceLibGen(faces_folder_path = r"./face lib"):
@@ -132,29 +128,30 @@ def faceRecog(libdict,imgpath,detector):
     return result_dict
 
 
-
-if __name__ == "__main__":
-    
-    facelib = faceLibGen(r'face lib')
-    if not facelib:
-        printlog('Empty Lib ... Program Ends','ERROR')
-        sys.exit()
-    try:
-        with open(r'./face lib/face.lib','wb') as f:
-            pickle.dump(facelib,f)
-    except:
-        printlog(traceback.format_exc(),'ERROR')
-        sys.exit()
-    '''
-    try:
-        with open(r'./face lib/face.lib','rb') as f:
-            facelib = pickle.load(f)
-    except:
-        printlog(traceback.format_exc(),'ERROR')
-        sys.exit()
-            
-    r = faceRecog(facelib,'test0.png')
-    '''    
+#
+#if __name__ == "__main__":
+#    
+#    facelib = faceLibGen(r'face lib')
+#    if not facelib:
+#        printlog('Empty Lib ... Program Ends','ERROR')
+#        sys.exit()
+#    try:
+#        with open(r'./face lib/face.lib','wb') as f:
+#            pickle.dump(facelib,f)
+#    except:
+#        printlog(traceback.format_exc(),'ERROR')
+#        sys.exit()
+#
+#    
+#    try:
+#        with open(r'./face lib/face.lib','rb') as f:
+#            facelib = pickle.load(f)
+#    except:
+#        printlog(traceback.format_exc(),'ERROR')
+#        sys.exit()
+#            
+#    r = faceRecog(facelib,'test0.png')
+     
 
 
 
