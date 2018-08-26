@@ -11,7 +11,7 @@ import dlib
 import glob
 from skimage import io
 import numpy as np
-import pickle
+import pickle,time
 
 from loggingcjc import printlog
         
@@ -95,17 +95,24 @@ def faceRecog1(libdict,imgpath):
 
 
 
-def faceRecog(libdict,imgpath):
-    try:
-        img = io.imread(imgpath)
-    except:
-        printlog("No img found at {}".format(imgpath),'ERROR' )
-        return []
+def initFacedetector():
     detectfacefromimg = dlib.get_frontal_face_detector()
     predictor_path = r"./model/shape_predictor_68_face_landmarks.dat"
     face_rec_model_path = r"./model/dlib_face_recognition_resnet_model_v1.dat"
     predictor = dlib.shape_predictor(predictor_path)
     facerec = dlib.face_recognition_model_v1(face_rec_model_path)
+    return detectfacefromimg, predictor, facerec
+    
+    
+def faceRecog(libdict,imgpath,detector):
+    start = time.time()
+    
+    try:
+        img = io.imread(imgpath)
+    except:
+        printlog("No img found at {}".format(imgpath),'ERROR' )
+        return []
+    [detectfacefromimg, predictor, facerec] = detector
     target = img[:,:,0:3]
     dets = detectfacefromimg(target, 1)
     printlog("Number of faces detected: {}".format(len(dets)))
@@ -120,6 +127,8 @@ def faceRecog(libdict,imgpath):
             distance[i] = np.linalg.norm(libdict[i]-v_target)
             if distance[i] < .45:    result_dict[i] = distance[i]
             printlog("Difference to {} is {}".format(i, distance[i]))
+    stop = time.time()
+    printlog("Time Consumption:{}s".format(stop-start),"INFO")
     return result_dict
 
 

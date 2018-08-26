@@ -8,7 +8,7 @@ import socket,datetime,time,pickle
 import sys,traceback,os
 from optparse import OptionParser
 from loggingcjc import printlog
-from record2facelib import faceRecog
+from record2facelib import faceRecog, initFacedetector
 
 portg = 12345
 loglevelg = 2
@@ -41,10 +41,9 @@ def deframer(cmd):
 
 
 def framer(eledict,facesDetected_dict):
-    eles = ['Facerecognition', eledict['subid'], eledict['chnid'], eledict['label'], eledict['file'],\
-            str(eledict['port']), str(eledict['n'])]
+    eles = ['Facerecognition', eledict['subid'], eledict['chnid'], eledict['label'],str(eledict['n'])]
     for i in range(eledict['n']):
-        if eledict[i][0] in facesDetecteds.keys():
+        if eledict[i][0] in facesDetected_dict.keys():
             eles.append( '{},{}'.format(eledict[i][0],1) )
         else:    eles.append( '{},{}'.format(eledict[i][0],0) )
     return '#$'.join(eles)
@@ -80,7 +79,7 @@ def optiondeal():
     
 #if __name__ == '__main__':
 portg,loglevelg = optiondeal()
-#cmd = r'Facerecognition#$111#$222#$hello#$C:\123.png#$5556#$3#$xidada,0#$huge,0#$cjc,0'
+#cmd = r'Facerecognition#$111#$222#$hello#$D:\Unistar\MultiScreen--FaceRec\test0.png#$5556#$3#$xidada,0#$HuGe,0#$cjc,0'
 logfileg = 'log@{}@{}.txt'.format(int(portg), datetime.datetime.now().strftime('%Y_%m_%d') )
 #TODO: Loading the face lib dict
 try:
@@ -88,7 +87,7 @@ try:
         facelib = pickle.load(f)
 except:
     printlog(traceback.format_exc(),'ERROR')
-    sys.exit()
+    facelib = {}
             
 #r = faceRecog(facelib,'test0.png')
 server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -102,6 +101,7 @@ printlog('===================== Face Recog Start =============================')
 
 interestfacelib={}
 faces_dict={}
+faceDetecor = initFacedetector()
 while True:
     try:
         data,addr_from = server.recvfrom(32768)
@@ -115,19 +115,24 @@ while True:
     if len(r_dict) is 1: 
         server.sendto("Not valid, check your command\n".encode('utf-8'),addr_from)
     elif not facelib:
-        server.sendto("Empyt Face Lib, Please check".encode('utf-8'), addr2reply )
+        #server.sendto("Empyt Face Lib, Please check".encode('utf-8'), addr2reply )
+        s = framer(r_dict,{})
+        server.sendto(s.encode('utf-8'), addr2reply )
         printlog("Send Message to {}:Empyt Face Lib, Please check".format(addr2reply),"WARNING")
     else:
         if not os.path.exists(r_dict['file']):
-            server.sendto("Image to Recog Face Not Exist ...".encode('utf-8'),addr2reply )
+            s = framer(r_dict,{})
+            server.sendto(s.encode('utf-8'), addr2reply )
+            #server.sendto("Image to Recog Face Not Exist ...".encode('utf-8'),addr2reply )
             printlog("Send Message to {}:Image to Recog Face Not Exist ...".format(addr2reply), "ERROR")
             continue
         interestfacelib = pickInterestLib(r_dict,facelib)
-        facesDetecteds = faceRecog(interestfacelib,r_dict['file'])
-        #for i in faces_dict.keys():
-            
-        
-        s = framer(r_dict,faces_dict)
+        if not interestfacelib:
+            s = framer(r_dict,{})
+            printlog("Interested Faces not in Lib @pickInterestLib","WARNING")
+        else:
+            faces_dict = faceRecog(interestfacelib,r_dict['file'],faceDetecor)
+            s = framer(r_dict,faces_dict)
         try:
             server.sendto(s.encode('utf-8'), (addr_from[0],r_dict['port']) )
             printlog( 'Message sent to {}:{}'.format(addr_from[0],r_dict['port']) )
