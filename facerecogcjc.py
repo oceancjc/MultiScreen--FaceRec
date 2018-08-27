@@ -4,11 +4,11 @@ Created on Sun Aug 19 14:31:32 2018
 
 """
 from __future__ import print_function
-import traceback,sys,os
+import sys,os
 import dlib,glob
 from skimage import io
 import numpy as np
-import pickle,time
+import time
 from loggingcjc import printlog
         
 
@@ -104,12 +104,12 @@ def faceRecog(libdict,imgpath,detector):
     start = time.time()
     
     try:
-        img = io.imread(imgpath)
+        target = io.imread(imgpath)[:,:,:3]
     except:
         printlog("No img found at {}".format(imgpath),'ERROR' )
         return []
     [detectfacefromimg, predictor, facerec] = detector
-    target = img[:,:,0:3]
+
     dets = detectfacefromimg(target, 1)
     printlog("Number of faces detected: {}".format(len(dets)))
     result_dict = {}
