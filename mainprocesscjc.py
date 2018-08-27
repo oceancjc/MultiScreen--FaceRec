@@ -28,7 +28,7 @@ def deframer(cmd):
         res['subid'] = cmd_s[1]
         res['chnid'] = cmd_s[2]
         res['label'] = cmd_s[3]
-        res['file']  = cmd_s[4]
+        res['file']  = str(cmd_s[4])
         res['port']  = int( cmd_s[5] )
         res['n']     = int( cmd_s[6] )
         if len(cmd_s) != 7+res['n']:
