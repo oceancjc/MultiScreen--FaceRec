@@ -4,9 +4,10 @@ Created on Sun Aug 19 14:31:32 2018
 
 """
 from __future__ import print_function
-import sys,os
+import sys,os,traceback
 import dlib,glob
-from skimage import io
+#from skimage import io
+import cv2
 import numpy as np
 import time
 from loggingcjc import printlog
@@ -32,7 +33,8 @@ def faceLibGen(faces_folder_path = r"./face lib"):
         sys.exit()
     for f in glob.glob(os.path.join(faces_folder_path, "*.png")):
         printlog("Processing file: {}".format(f))
-        img = io.imread(f)
+        #img = io.imread(f)
+        img = cv2.imread(f)
         face_libs.append(os.path.split(f)[-1][:-4])
         win.clear_overlay()
         win.set_image(img)
@@ -64,7 +66,8 @@ def faceLibGen(faces_folder_path = r"./face lib"):
 
 def faceRecog1(libdict,imgpath):
     try:
-        img = io.imread(imgpath)
+        #img = io.imread(imgpath)
+        img = cv2.imread(imgpath)
     except:
         printlog("No img found at {}".format(imgpath),'ERROR' )
         return []
@@ -104,8 +107,10 @@ def faceRecog(libdict,imgpath,detector):
     start = time.time()
     
     try:
-        target = io.imread(imgpath)[:,:,:3]
+        #target = io.imread(imgpath)[:,:,:3]
+        target = cv2.imread(imgpath)[:,:,:3]
     except:
+        printlog(traceback.format_exc(),'ERROR')
         printlog("No img found at {}".format(imgpath),'ERROR' )
         return {}
     [detectfacefromimg, predictor, facerec] = detector
