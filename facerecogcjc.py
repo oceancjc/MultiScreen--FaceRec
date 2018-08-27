@@ -107,7 +107,7 @@ def faceRecog(libdict,imgpath,detector):
         target = io.imread(imgpath)[:,:,:3]
     except:
         printlog("No img found at {}".format(imgpath),'ERROR' )
-        return []
+        return {}
     [detectfacefromimg, predictor, facerec] = detector
 
     dets = detectfacefromimg(target, 1)
