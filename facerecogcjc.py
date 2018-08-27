@@ -18,8 +18,8 @@ from loggingcjc import printlog
     
 def faceLibGen(faces_folder_path = r"./face lib"):
     detectfacefromimg = dlib.get_frontal_face_detector()
-    predictor_path = r"./model/shape_predictor_68_face_landmarks.dat"
-    face_rec_model_path = r"./model/dlib_face_recognition_resnet_model_v1.dat"
+    predictor_path = r"./model/face_feature.bin"
+    face_rec_model_path = r"./model/resnet.bin"
     predictor = dlib.shape_predictor(predictor_path)
     facerec = dlib.face_recognition_model_v1(face_rec_model_path)
 
@@ -72,8 +72,8 @@ def faceRecog1(libdict,imgpath):
         printlog("No img found at {}".format(imgpath),'ERROR' )
         return []
     detectfacefromimg = dlib.get_frontal_face_detector()
-    predictor_path = r"./model/shape_predictor_68_face_landmarks.dat"
-    face_rec_model_path = r"./model/dlib_face_recognition_resnet_model_v1.dat"
+    predictor_path = r"./model/face_feature.bin"
+    face_rec_model_path = r"./model/resnet.bin"
     predictor = dlib.shape_predictor(predictor_path)
     facerec = dlib.face_recognition_model_v1(face_rec_model_path)
     target = img[:,:,0:3]
@@ -96,8 +96,8 @@ def faceRecog1(libdict,imgpath):
 
 def initFacedetector():
     detectfacefromimg = dlib.get_frontal_face_detector()
-    predictor_path = r"./model/shape_predictor_68_face_landmarks.dat"
-    face_rec_model_path = r"./model/dlib_face_recognition_resnet_model_v1.dat"
+    predictor_path = r"./model/face_feature.bin"
+    face_rec_model_path = r"./model/resnet.bin"
     predictor = dlib.shape_predictor(predictor_path)
     facerec = dlib.face_recognition_model_v1(face_rec_model_path)
     return detectfacefromimg, predictor, facerec
