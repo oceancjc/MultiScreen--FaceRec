@@ -30,6 +30,7 @@ def keyVerify(string,key=''):
     for i in secondranges:
         timestring = ( now + datetime.timedelta(seconds=i) ).strftime('%Y%m%d%H%M%S')
         code = MD5gen(key+timestring)
+        printlog('Delta:{}, code:{}'.format(i,code),'DEBUG')
         if code in string:
             printlog('Verify Success, delta is {}s'.format(i))
             return True

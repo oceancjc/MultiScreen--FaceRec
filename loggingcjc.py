@@ -51,20 +51,22 @@ def printlog(content, title = 'INFO' ):
         
 
 def setupLog(loglevel):
-   logger = logging.getLogger() 
-   logger.setLevel(logging.INFO)
-   formatter = logging.Formatter('%(asctime)s [%(levelname)s]: %(message)s')
-   if loglevel == 2:
-       global logfileg
-       handler = logging.FileHandler(logfileg)
-       handler.setLevel(logging.INFO)
-       handler.setFormatter(formatter)
-       logger.addHandler(handler)
-   console = logging.StreamHandler()
-   console.setLevel(logging.INFO)
-   console.setFormatter(formatter)
-   logger.addHandler(console)
-   
+    logging.getLogger().handlers = []
+    logger = logging.getLogger('cjc') 
+    logger.setLevel(logging.INFO)
+    formatter = logging.Formatter('[%(asctime)s %(levelname)s]%(message)s')
+    if loglevel == 2:
+        global logfileg
+        handler = logging.FileHandler(logfileg)
+        handler.setLevel(logging.INFO)
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    console.setFormatter(formatter)
+    logger.addHandler(console)
+    return logger
+       
    
    
    
