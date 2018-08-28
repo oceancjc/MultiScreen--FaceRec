@@ -133,6 +133,39 @@ def faceRecog(libdict,imgpath,detector):
     return result_dict
 
 
+
+def faceLike(libdict,imgpath,detector):
+    start = time.time()
+    
+    try:
+        target = cv2.imread(imgpath)[:,:,:3]
+    except:
+        printlog(traceback.format_exc(),'ERROR')
+        printlog("No img found at {}".format(imgpath),'ERROR' )
+        return {}
+    [detectfacefromimg, predictor, facerec] = detector
+
+    dets = detectfacefromimg(target, 1)
+    printlog("Number of faces detected: {}".format(len(dets)))
+    result_dict = {}
+    for k, d in enumerate(dets):
+        shape = predictor(target,d)
+        face_descriptor = facerec.compute_face_descriptor(target, shape)
+        v_target = np.array(face_descriptor)
+        
+        distance = {}
+        for i in libdict.keys():
+            distance[i] = np.linalg.norm(libdict[i]-v_target)
+            #if distance[i] < .45:    result_dict[i] = distance[i]
+            result_dict[i] = distance[i]
+            printlog("Difference to {} is {}".format(i, distance[i]))
+    stop = time.time()
+    printlog("Time Consumption:{}s".format(stop-start),"INFO")
+    return result_dict
+
+
+
+
 #
 #if __name__ == "__main__":
 #    
