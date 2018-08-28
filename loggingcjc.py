@@ -51,10 +51,9 @@ def printlog(content, title = 'INFO' ):
         
 
 def setupLog(loglevel):
-    logging.getLogger().handlers = []
     logger = logging.getLogger('cjc') 
     logger.setLevel(logging.INFO)
-    formatter = logging.Formatter('[%(asctime)s %(levelname)s]%(message)s')
+    formatter = logging.Formatter('[%(asctime)s %(levelname)s] %(message)s',datefmt='%Y-%m-%d %H:%M:%S')
     if loglevel == 2:
         global logfileg
         handler = logging.FileHandler(logfileg)
