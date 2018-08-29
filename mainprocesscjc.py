@@ -216,9 +216,11 @@ if __name__ == '__main__':
         r_dict = deframer( str(data) )
         if len(r_dict) is 1: 
             server.sendto("Not valid, check your command".encode('utf-8'),addr_from)
+            printlog('deframer result is {}'.format(r_dict),'DEBUG')
         #20180828: Add keyverify branch to verify the md5string in the last of frame
         elif not keyVerify(r_dict['md5'],KEY):
             server.sendto("Verification failure !".encode('utf-8'),addr_from)
+            printlog('deframer result is {}'.format(r_dict),'DEBUG')
         elif not facelib:
             addr2reply = (addr_from[0],r_dict['port'])
             s = framer(r_dict,{})

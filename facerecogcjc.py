@@ -4,24 +4,34 @@ Created on Sun Aug 19 14:31:32 2018
 
 """
 from __future__ import print_function
-import sys,os,traceback
+import sys,os,traceback,datetime
 import dlib,glob
-#from skimage import io
 import cv2
 import numpy as np
 import time
+import loggingcjc
 from loggingcjc import printlog
         
 
 
-    
-    
-def faceLibGen(faces_folder_path = r"./face lib"):
+def initFacedetector():
     detectfacefromimg = dlib.get_frontal_face_detector()
     predictor_path = r"./model/face_feature.bin"
     face_rec_model_path = r"./model/resnet.bin"
+    if not os.path.exists(predictor_path):
+        printlog('Critical File not found:{}'.format(predictor_path))
+        return -1
+    if not os.path.exists(face_rec_model_path):
+        printlog('Critical File not found:{}'.format(face_rec_model_path))
+        return -2    
     predictor = dlib.shape_predictor(predictor_path)
     facerec = dlib.face_recognition_model_v1(face_rec_model_path)
+    return detectfacefromimg, predictor, facerec
+
+
+    
+def faceLibGen(faces_folder_path = r"./face lib",detector):
+    [detectfacefromimg, predictor, facerec] = detector
 
     win = dlib.image_window()
 
@@ -64,44 +74,35 @@ def faceLibGen(faces_folder_path = r"./face lib"):
 
 
 
-def faceRecog1(libdict,imgpath):
-    try:
-        #img = io.imread(imgpath)
-        img = cv2.imread(imgpath)
-    except:
-        printlog("No img found at {}".format(imgpath),'ERROR' )
-        return []
-    detectfacefromimg = dlib.get_frontal_face_detector()
-    predictor_path = r"./model/face_feature.bin"
-    face_rec_model_path = r"./model/resnet.bin"
-    predictor = dlib.shape_predictor(predictor_path)
-    facerec = dlib.face_recognition_model_v1(face_rec_model_path)
-    target = img[:,:,0:3]
-    dets = detectfacefromimg(target, 1)
-    printlog("Number of faces detected: {}".format(len(dets)))
-    results = [['NONE',0.45]]*len(dets)
-    for k, d in enumerate(dets):
-        shape = predictor(target,d)
-        face_descriptor = facerec.compute_face_descriptor(target, shape)
-        v_target = np.array(face_descriptor)
-        
-        distance = {}
-        for i in libdict.keys():
-            distance[i] = np.linalg.norm(libdict[i]-v_target)
-            if distance[i] < results[k][1]:    results[k] = [i,distance[i]]
-            printlog("Difference to {} is {}".format(i, distance[i]))
-    return results
+#def faceRecog1(libdict,imgpath):
+#    try:
+#        #img = io.imread(imgpath)
+#        img = cv2.imread(imgpath)
+#    except:
+#        printlog("No img found at {}".format(imgpath),'ERROR' )
+#        return []
+#    detectfacefromimg = dlib.get_frontal_face_detector()
+#    predictor_path = r"./model/face_feature.bin"
+#    face_rec_model_path = r"./model/resnet.bin"
+#    predictor = dlib.shape_predictor(predictor_path)
+#    facerec = dlib.face_recognition_model_v1(face_rec_model_path)
+#    target = img[:,:,0:3]
+#    dets = detectfacefromimg(target, 1)
+#    printlog("Number of faces detected: {}".format(len(dets)))
+#    results = [['NONE',0.45]]*len(dets)
+#    for k, d in enumerate(dets):
+#        shape = predictor(target,d)
+#        face_descriptor = facerec.compute_face_descriptor(target, shape)
+#        v_target = np.array(face_descriptor)
+#        
+#        distance = {}
+#        for i in libdict.keys():
+#            distance[i] = np.linalg.norm(libdict[i]-v_target)
+#            if distance[i] < results[k][1]:    results[k] = [i,distance[i]]
+#            printlog("Difference to {} is {}".format(i, distance[i]))
+#    return results
 
 
-
-def initFacedetector():
-    detectfacefromimg = dlib.get_frontal_face_detector()
-    predictor_path = r"./model/face_feature.bin"
-    face_rec_model_path = r"./model/resnet.bin"
-    predictor = dlib.shape_predictor(predictor_path)
-    facerec = dlib.face_recognition_model_v1(face_rec_model_path)
-    return detectfacefromimg, predictor, facerec
-    
     
 def faceRecog(libdict,imgpath,detector):
     start = time.time()
@@ -165,30 +166,28 @@ def faceLike(libdict,imgpath,detector):
 
 
 
+import pickle
 
-#
-#if __name__ == "__main__":
-#    
-#    facelib = faceLibGen(r'face lib')
-#    if not facelib:
-#        printlog('Empty Lib ... Program Ends','ERROR')
-#        sys.exit()
-#    try:
-#        with open(r'./face lib/face.lib','wb') as f:
-#            pickle.dump(facelib,f)
-#    except:
-#        printlog(traceback.format_exc(),'ERROR')
-#        sys.exit()
-#
-#    
-#    try:
-#        with open(r'./face lib/face.lib','rb') as f:
-#            facelib = pickle.load(f)
-#    except:
-#        printlog(traceback.format_exc(),'ERROR')
-#        sys.exit()
-#            
-#    r = faceRecog(facelib,'test0.png')
+if __name__ == "__main__":
+    logfileg = 'LibGenlog@{}.txt'.format(datetime.datetime.now().strftime('%Y_%m_%d') )
+    loggingcjc.setloglevel(1)
+    loggingcjc.setlogfilePath(logfileg)
+    loggingcjc.setupLog()
+    
+    faceDetecor = initFacedetector()
+    facelib = faceLibGen(r'face lib',faceDetecor)
+    if not facelib:
+        printlog('Empty Lib ... Program Ends','ERROR')
+        sys.exit()
+    try:
+        with open(r'./face lib/face.lib','wb') as f:
+            pickle.dump(facelib,f)
+    except:
+        printlog(traceback.format_exc(),'ERROR')
+        sys.exit()
+
+    
+
      
 
 
