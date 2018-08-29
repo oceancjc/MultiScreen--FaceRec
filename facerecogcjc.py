@@ -30,7 +30,7 @@ def initFacedetector():
 
 
     
-def faceLibGen(faces_folder_path = r"./face lib",detector):
+def faceLibGen(faces_folder_path, detector):
     [detectfacefromimg, predictor, facerec] = detector
 
     win = dlib.image_window()

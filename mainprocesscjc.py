@@ -30,7 +30,7 @@ def keyVerify(string,key=''):
     for i in secondranges:
         timestring = ( now + datetime.timedelta(seconds=i) ).strftime('%Y%m%d%H%M%S')
         code = MD5gen(key+timestring)
-        printlog('Delta:{}, code:{}'.format(i,code),'DEBUG')
+        printlog('Delta:{},\tcode:{}'.format(i,code),'DEBUG')
         if code in string:
             printlog('Verify Success, delta is {}s'.format(i))
             return True
@@ -202,7 +202,10 @@ if __name__ == '__main__':
     printlog("My IP:127.0.0.1:{}\tLog Level:{}".format(portg,loglevelg))
     interestfacelib={}
     faces_dict={}
-    faceDetecor = initFacedetector()
+    faceDetector = initFacedetector()
+    if faceDetector == -1 or faceDetector== -2:
+        printlog('Critical Error: No AI model exists, Program Ends','ERROR')
+        sys.exit()
     while True:
         try:
             data,addr_from = server.recvfrom(32768)
@@ -239,7 +242,7 @@ if __name__ == '__main__':
                 s = framer(r_dict,{})
                 printlog("Interested Faces not in Lib @pickInterestLib","WARNING")
             else:
-                faces_dict = faceLike(interestfacelib,r_dict['file'],faceDetecor)
+                faces_dict = faceLike(interestfacelib,r_dict['file'],faceDetector)
                 s = framer(r_dict,faces_dict)
             try:
                 server.sendto(s.encode('utf-8'), (addr_from[0],r_dict['port']) )
