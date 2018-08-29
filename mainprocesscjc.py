@@ -183,7 +183,7 @@ if __name__ == '__main__':
     logfileg = 'log@{}@{}.txt'.format(int(portg), datetime.datetime.now().strftime('%Y_%m_%d') )
     loggingcjc.setloglevel(loglevelg)
     loggingcjc.setlogfilePath(logfileg)
-    
+    loggingcjc.setupLog()
     try:
         with open(r'./face lib/face.lib','rb') as f:
             facelib = pickle.load(f)
