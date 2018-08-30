@@ -34,7 +34,7 @@ def initFacedetector():
 def faceLibGen(faces_folder_path, detector):
     [detectfacefromimg, predictor, facerec] = detector
 
-    win = dlib.image_window()
+    #win = dlib.image_window()
 
 # Now process all the images
     descriptors = []
@@ -45,11 +45,12 @@ def faceLibGen(faces_folder_path, detector):
     for f in glob.glob(os.path.join(faces_folder_path, "*.png")):
         printlog("Processing file: {}".format(f))
         #img = io.imread(f)
-        img = cv2.imread(f)
+        img = cv2.imread(f)[:,:,:3]
         face_libs.append(os.path.split(f)[-1][:-4])
-        win.clear_overlay()
-        win.set_image(img)
-
+        #win.clear_overlay()
+        #win.set_image(img)
+        cv2.imshow(f,img)
+        cv2.waitKey(1)
         dets = detectfacefromimg(img, 1)
         printlog("Number of faces detected: {}".format(len(dets)))
         if len(dets) > 1:
@@ -59,8 +60,8 @@ def faceLibGen(faces_folder_path, detector):
         for k, d in enumerate(dets):
             shape = predictor(img, d)#d = rectangle
             
-            win.clear_overlay()
-            win.add_overlay(d)
+            #win.clear_overlay()
+            #win.add_overlay(d)
             #win.add_overlay(shape)
     
             face_descriptor = facerec.compute_face_descriptor(img, shape)
@@ -69,8 +70,8 @@ def faceLibGen(faces_folder_path, detector):
             v = np.array(face_descriptor)  
             descriptors.append(v)
 
-            dlib.hit_enter_to_continue()
-        
+            #time.sleep(0.5)
+        cv2.destroyAllWindows()
     return dict(zip(face_libs,descriptors))
 
 
