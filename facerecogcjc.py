@@ -9,6 +9,7 @@ import dlib,glob
 import cv2
 import numpy as np
 import time
+from optparse import OptionParser
 import loggingcjc
 from loggingcjc import printlog
         
@@ -165,17 +166,35 @@ def faceLike(libdict,imgpath,detector):
     return result_dict
 
 
-
+loglevelg = 1
+def optiondeal():
+    parser = OptionParser() 
+    usage = "usage: %prog [options] arg1 arg2"  
+    parser = OptionParser(usage=usage) 
+    
+    global loglevelg
+    
+    parser.add_option("-l", "--logLevel", 
+                      action="store", dest="loglevelg",default='1',type='int',
+                      help="Log Enable for program, 0 to disable, 1 to enable") 
+    
+    (options, args) = parser.parse_args()
+    loglevelg = options.loglevelg
+    
+    
 import pickle
 
 if __name__ == "__main__":
     logfileg = 'LibGenlog@{}.txt'.format(datetime.datetime.now().strftime('%Y_%m_%d') )
-    loggingcjc.setloglevel(1)
+    loggingcjc.setloglevel(loglevelg)
     loggingcjc.setlogfilePath(logfileg)
     loggingcjc.setupLog()
     
-    faceDetecor = initFacedetector()
-    facelib = faceLibGen(r'face lib',faceDetecor)
+    faceDetector = initFacedetector()
+    if faceDetector == -1 or faceDetector== -2:
+        printlog('Critical Error: No AI model exists, Program Ends','ERROR')
+        sys.exit()
+    facelib = faceLibGen(r'face lib',faceDetector)
     if not facelib:
         printlog('Empty Lib ... Program Ends','ERROR')
         sys.exit()
