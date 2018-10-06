@@ -74,7 +74,7 @@ def framer(eledict,facesDetected_dict):
         if eledict[i][0] in facesDetected_dict.keys():
             eles.append( '{},{}'.format(eledict[i][0],
                         round(1-facesDetected_dict[eledict[i][0]], 4) ) )
-        else:    eles.append( '{},{}'.format(eledict[i][0],1) )
+        else:    eles.append( '{},{}'.format(eledict[i][0],0) )
     return '#$'.join(eles)
 
 
