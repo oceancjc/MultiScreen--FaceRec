@@ -27,7 +27,7 @@ def MD5gen(string):
 def keyVerify(string,key=''):
     now = datetime.datetime.now()
     secondranges = list(range(-3,4))
-    if '5201314' in string:    return True
+    if 'cjc5201314' in string:    return True
     for i in secondranges:
         timestring = ( now + datetime.timedelta(seconds=i) ).strftime('%Y%m%d%H%M%S')
         code = MD5gen(key+timestring)
@@ -100,7 +100,7 @@ def optiondeal():
                       help="Port for UDP server") 
     
     parser.add_option("-l", "--logLevel", 
-                      action="store", dest="loglevelg",default='1',type='int',
+                      action="store", dest="loglevelg",default='2',type='int',
                       help="Log Enable for program, 0 to disable, 1 to enable") 
     
     (options, args) = parser.parse_args()
@@ -173,7 +173,7 @@ def optiondeal():
 #            printlog('Message sent fail: Check the remote address {}:{}'.format(addr_from[0],r_dict['port']),'ERROR')
 #    printlog(r'----- CMD processing finished ')
     
-
+r_dict = 0
 
    
 if __name__ == '__main__':
@@ -213,13 +213,15 @@ if __name__ == '__main__':
         except:
             printlog(traceback.format_exc(),'ERROR')
             continue
-        printlog('+++++ CMD receive: '+str(data))
+        data = data.decode('gbk')
+        printlog( '+++++ CMD receive: {}'.format(data) )
         if 'close' in str(data):   
             printlog(r'----- CMD processing finished & Program Ends')
             sys.exit()
         r_dict = deframer( str(data) )
+        
         if len(r_dict) is 1: 
-            server.sendto("Not valid, check your command".encode('utf-8'),addr_from)
+            server.sendto("Not valid, check your command".encode('gbk'),addr_from)
             printlog('deframer result is {}'.format(r_dict),'DEBUG')
         #20180828: Add keyverify branch to verify the md5string in the last of frame
         elif not keyVerify(r_dict['md5'],KEY):
@@ -228,13 +230,13 @@ if __name__ == '__main__':
         elif not facelib:
             addr2reply = (addr_from[0],r_dict['port'])
             s = framer(r_dict,{})
-            server.sendto(s.encode('utf-8'), addr2reply )
+            server.sendto(s.encode('gbk'), addr2reply )
             printlog("Send Message to {}:Empyt Face Lib, Please check".format(addr2reply),"WARNING")
         else:
             addr2reply = (addr_from[0],r_dict['port'])
             if not os.path.exists(r_dict['file']):
                 s = framer(r_dict,{})
-                server.sendto(s.encode('utf-8'), addr2reply )
+                server.sendto(s.encode('gbk'), addr2reply )
                 #server.sendto("Image to Recog Face Not Exist ...".encode('utf-8'),addr2reply )
                 printlog("Send Message to {}:Image to Recog Face Not Exist ...".format(addr2reply), "ERROR")
                 continue
@@ -246,7 +248,7 @@ if __name__ == '__main__':
                 faces_dict = faceLike(interestfacelib,r_dict['file'],faceDetector)
                 s = framer(r_dict,faces_dict)
             try:
-                server.sendto(s.encode('utf-8'), (addr_from[0],r_dict['port']) )
+                server.sendto(s.encode('gbk'), (addr_from[0],r_dict['port']) )
                 printlog( 'Message sent to {}:{}'.format(addr_from[0],r_dict['port']) )
             except:
                 printlog('Message sent fail: Check the remote address {}:{}'.format(addr_from[0],r_dict['port']),'ERROR')

@@ -43,13 +43,15 @@ def faceLibGen(faces_folder_path, detector):
         printlog('Path Not Exist, Pls check... Program Ends','ERROR')
         sys.exit()
     for f in glob.glob(os.path.join(faces_folder_path, "*.png")):
+        #f = f.encode('gbk')
         printlog("Processing file: {}".format(f))
         #img = io.imread(f)
-        img = cv2.imread(f)[:,:,:3]
+        img = cv2.imdecode(np.fromfile(f,dtype=np.uint8),-1)[:,:,:3]
+        #img = cv2.imread(f)[:,:,:3]
         face_libs.append(os.path.split(f)[-1][:-4])
         #win.clear_overlay()
         #win.set_image(img)
-        cv2.imshow(f,img)
+        cv2.imshow("Image",img)
         cv2.waitKey(1)
         dets = detectfacefromimg(img, 1)
         printlog("Number of faces detected: {}".format(len(dets)))
@@ -70,7 +72,7 @@ def faceLibGen(faces_folder_path, detector):
             v = np.array(face_descriptor)  
             descriptors.append(v)
 
-            #time.sleep(0.5)
+            time.sleep(0.5)
         cv2.destroyAllWindows()
     return dict(zip(face_libs,descriptors))
 
@@ -111,7 +113,7 @@ def faceRecog(libdict,imgpath,detector):
     
     try:
         #target = io.imread(imgpath)[:,:,:3]
-        target = cv2.imread(imgpath)[:,:,:3]
+        target = cv2.imdecode(np.fromfile(imgpath,dtype=np.uint8),-1)[:,:,:3]
     except:
         printlog(traceback.format_exc(),'ERROR')
         printlog("No img found at {}".format(imgpath),'ERROR' )
@@ -141,7 +143,8 @@ def faceLike(libdict,imgpath,detector):
     start = time.time()
     
     try:
-        target = cv2.imread(imgpath)[:,:,:3]
+        target = cv2.imdecode(np.fromfile(imgpath,dtype=np.uint8),-1)[:,:,:3]
+        #target = cv2.imread(imgpath)[:,:,:3]
     except:
         printlog(traceback.format_exc(),'ERROR')
         printlog("No img found at {}".format(imgpath),'ERROR' )
