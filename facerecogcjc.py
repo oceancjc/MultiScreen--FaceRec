@@ -139,7 +139,7 @@ def faceRecog(libdict,imgpath,detector):
 
 
 
-def faceLike(libdict,imgpath,detector):
+def faceLike(libdict,imgpath,detector,maxfaceOnce = 5):
     start = time.time()
     
     try:
@@ -152,8 +152,12 @@ def faceLike(libdict,imgpath,detector):
     [detectfacefromimg, predictor, facerec] = detector
 
     dets = detectfacefromimg(target, 1)
-    printlog("Number of faces detected: {}".format(len(dets)))
+    num_faces = len(dets)
+    printlog("Number of faces detected: {}".format(num_faces))
     result_dict = {}
+    if num_faces > maxfaceOnce:
+        printlog("To much faces detected, threashold is {}".format(maxfaceOnce),'ERROR')
+        return result_dict
     for k, d in enumerate(dets):
         shape = predictor(target,d)
         face_descriptor = facerec.compute_face_descriptor(target, shape)

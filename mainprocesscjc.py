@@ -17,6 +17,7 @@ import hashlib
 
 portg = 12345
 loglevelg = 2
+MAX_FACE_CNT = 5
 KEY = ":&?`Lb|}7Qd[.th/O2$F9E5s!D)6w'Yn"
 
 def MD5gen(string):
@@ -94,7 +95,7 @@ def optiondeal():
     usage = "usage: %prog [options] arg1 arg2"  
     parser = OptionParser(usage=usage) 
     
-    global portg, loglevelg
+    global portg, loglevelg, MAX_FACE_CNT
     parser.add_option("-p", "--port", 
                       action="store", dest="portg",default='12345',type='int',
                       help="Port for UDP server") 
@@ -102,10 +103,17 @@ def optiondeal():
     parser.add_option("-l", "--logLevel", 
                       action="store", dest="loglevelg",default='2',type='int',
                       help="Log Enable for program, 0 to disable, 1 to enable") 
+
+    parser.add_option("-f", "--maxFaceCount", 
+                      action="store", dest="MAX_FACE_CNT",default='5',type='int',
+                      help="Max face count can be detected simutaniously,Min is 1") 
+
     
     (options, args) = parser.parse_args()
     portg = options.portg
     loglevelg = options.loglevelg
+    MAX_FACE_CNT = options.MAX_FACE_CNT
+    if MAX_FACE_CNT < 1:    MAX_FACE_CNT = 1
 
 #portg,loglevelg = optiondeal()
 ##cmd = r'Facerecognition#$111#$222#$hello#$D:\Unistar\MultiScreen--FaceRec\test0.png#$5556#$3#$xidada,0#$HuGe,0#$cjc,0'
@@ -245,7 +253,7 @@ if __name__ == '__main__':
                 s = framer(r_dict,{})
                 printlog("Interested Faces not in Lib @pickInterestLib","WARNING")
             else:
-                faces_dict = faceLike(interestfacelib,r_dict['file'],faceDetector)
+                faces_dict = faceLike(interestfacelib,r_dict['file'],faceDetector,MAX_FACE_CNT)
                 s = framer(r_dict,faces_dict)
             try:
                 server.sendto(s.encode('gbk'), (addr_from[0],r_dict['port']) )
